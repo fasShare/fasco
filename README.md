@@ -1,2 +1,2 @@
-# fasco
-mco run in thread
+# mco
+coroutine of moxie
