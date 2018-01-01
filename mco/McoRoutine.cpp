@@ -83,28 +83,28 @@ McoRoutine *McoCreate(CoCallback run, bool use_private) {
 
 void McoSwap(McoRoutine *sink, McoRoutine *co) {
 	char c; 
-    LOGGER_TRACE("Begin McoSwap");	
+    //LOGGER_TRACE("Begin McoSwap");	
 	sink->coctx->stack->stack_sp = &c;
-    LOGGER_TRACE("After set stack_sp");	
+    //LOGGER_TRACE("After set stack_sp");	
 	if (!co->coctx->stack->is_private) {
-        LOGGER_TRACE("Before GetCommonOccupy");
+        //LOGGER_TRACE("Before GetCommonOccupy");
 		auto occupy_co_tmp = GetCommonOccupy();
-        LOGGER_TRACE("After GetCommonOccupy");
+        //LOGGER_TRACE("After GetCommonOccupy");
         SetCommonOccupy(co);
-        LOGGER_TRACE("After SetCommonOccupy");
-        LOGGER_TRACE("CommonOccupy:" << (unsigned long)occupy_co_tmp); 
-        LOGGER_TRACE("co:" << (unsigned long)co); 
+        //LOGGER_TRACE("After SetCommonOccupy");
+        //LOGGER_TRACE("CommonOccupy:" << (unsigned long)occupy_co_tmp); 
+        //LOGGER_TRACE("co:" << (unsigned long)co); 
 		if (occupy_co_tmp && occupy_co_tmp != co 
 			&& !(occupy_co_tmp->done && occupy_co_tmp->done_yield)) {
             occupy_co_tmp->stack_store = true;
-            LOGGER_TRACE("Before StoreUsedCommonStack");
+            //LOGGER_TRACE("Before StoreUsedCommonStack");
 			StoreUsedCommonStack(occupy_co_tmp->coctx->stack);
-            LOGGER_TRACE("After StoreUsedCommonStack");
+            //LOGGER_TRACE("After StoreUsedCommonStack");
 		}
 	}
-    LOGGER_TRACE("Before mcontext_swap."); 
+    //LOGGER_TRACE("Before mcontext_swap."); 
 	mcontext_swap(sink->coctx->ctx, co->coctx->ctx);
-    LOGGER_TRACE("after mcontext_swap."); 
+    //LOGGER_TRACE("after mcontext_swap."); 
     
     auto callstack = GetMcoCallStack();
     auto cur_co = callstack->getCurMco();
@@ -114,12 +114,9 @@ void McoSwap(McoRoutine *sink, McoRoutine *co) {
     }
 }
 
-void McoResume(McoRoutine *co) {
-	if (!co || co->running || (co->done && co->done_yield)) {
-		return;
-	}
-	auto callstack = GetMcoCallStack();
-	auto& cur_index = callstack->getCurrIndex();
+McoRoutine *MainMco() {
+    auto callstack = GetMcoCallStack();
+    auto& cur_index = callstack->getCurrIndex();
     if (cur_index == 0) {
         auto sink = McoCreate(CoEmpty, true);
 		McontextMake(sink->coctx->ctx, (cofunc)(CoroutineRun), (void *)sink);
@@ -127,6 +124,19 @@ void McoResume(McoRoutine *co) {
 		sink->is_main = true;
 		sink->start = true;
 		sink->running = true;
+        sink->in_callstack = true;
+    }
+    return (*callstack)[0];
+}
+
+void McoResume(McoRoutine *co) {
+	if (!co || co->running || (co->done && co->done_yield)) {
+		return;
+	}
+	auto callstack = GetMcoCallStack();
+	auto& cur_index = callstack->getCurrIndex();
+    if (cur_index == 0) {
+         MainMco();
     }
 	// 如果当前协程是从co切换过来的，此时应该使用yield，而不是resume，不然会导致栈区的重复保存。 
 	auto cur_co = (*callstack)[cur_index-1];
@@ -139,10 +149,11 @@ void McoResume(McoRoutine *co) {
 		(*callstack)[cur_index++] = co;
 		co->sink = (*callstack)[cur_index-2];
 		co->sink->running = false;
-        LOGGER_TRACE("will resume co:" << (unsigned long)co);
-        LOGGER_TRACE("will resume sink:" << (unsigned long)(co->sink));
-        LOGGER_TRACE("co stack:" << (unsigned long)(co->coctx->stack->stack));
-        LOGGER_TRACE("sink stack:" << (unsigned long)(co->sink->coctx->stack->stack));
+        co->in_callstack = true;
+        //LOGGER_TRACE("will resume co:" << (unsigned long)co);
+        //LOGGER_TRACE("will resume sink:" << (unsigned long)(co->sink));
+        //LOGGER_TRACE("co stack:" << (unsigned long)(co->coctx->stack->stack));
+        //LOGGER_TRACE("sink stack:" << (unsigned long)(co->sink->coctx->stack->stack));
 		McoSwap(co->sink, co);
 	} else {
 		McoYield(cur_co);
@@ -164,14 +175,15 @@ void McoYield(McoRoutine *co) {
     assert(sink == (*callstack)[cur_index-2]);
     cur_index--;
     co->running = false;
+    co->in_callstack = true;
     sink->running = true;
-    LOGGER_TRACE("will swap co:" << (unsigned long)co);
-    LOGGER_TRACE("will swap sink:" << (unsigned long)sink);
+    //LOGGER_TRACE("will swap co:" << (unsigned long)co);
+    //LOGGER_TRACE("will swap sink:" << (unsigned long)sink);
 	
 	McoSwap(co, sink);
 }
 void McoFree(McoRoutine *co) {
-    LOGGER_TRACE("will free co:" << (unsigned long)co);
+    //LOGGER_TRACE("will free co:" << (unsigned long)co);
 	if (!co || co->running) {
 		co->should_close = true;
 		return;

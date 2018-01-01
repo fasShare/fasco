@@ -2,34 +2,41 @@
 #define MOXIE_CONTINUATION_H
 #include <iostream>
 
-#include "McoRoutine.h"
-#include "McoCallStack.h"
+#include <McoRoutine.h>
 
 class Continuation {
 public:
     Continuation (CoCallback call) :
-        co(nullptr) {
-        co = McoCreate(call);
+        co_(nullptr) {
+        co_ = McoCreate(call);
     }
     
+    Continuation (McoRoutine *co) :
+        co_(co) {
+    }
+
     void resume() {
-        McoResume(co);
+        McoResume(co_);
     }
 
     void yield() {
-        McoYield(co);
+
+        McoYield(co_);
     }
 
     ~Continuation() {
-        McoFree(co);
+        McoFree(co_);
         std::cout << "Mco will destroyed!" << std::endl;
     }
-    static void YieldCurMco() {
-        auto callstack = GetMcoCallStack();
-        McoYield(callstack->getCurMco());
+    boost::shared_ptr<Continuation> getSink() {
+        return sink_;
+    }
+    void setSink(boost::shared_ptr<Continuation> sink) {
+        sink_ = sink;
     }
 private:
-    McoRoutine *co;
+    McoRoutine *co_;
+    boost::shared_ptr<Continuation> sink_;
 };
 
 #endif 

@@ -27,7 +27,8 @@ struct McoRoutine {
     McoContext *coctx;
     struct McoRoutine *sink;
 	bool is_main;
-	bool should_close = true;
+    bool in_callstack;
+	bool should_close;
     bool start;
 	bool running;
     bool done;
@@ -37,6 +38,7 @@ struct McoRoutine {
         coctx(nullptr),
         sink(nullptr),
 		is_main(false),
+        in_callstack(false),
 		should_close(false),
         start(false),
 		running(false),
@@ -61,4 +63,5 @@ McoRoutine *McoCreate(CoCallback run, bool use_private = false);
 void McoResume(McoRoutine *co);
 void McoYield(McoRoutine *co);
 void McoFree(McoRoutine *co);
+McoRoutine *MainMco();
 #endif //MOXIE_MCOROUTINE_H
