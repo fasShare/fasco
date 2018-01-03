@@ -17,7 +17,11 @@ void client_call(int fd) {
 		if (ret > 0) {
 			buf[ret] = 0;
 			printf("recv:%s\n", buf);
-		}
+		} else {
+            printf("read error:%s\n", strerror(errno));
+            close(fd);
+            break;
+        }
 	}
 }
 
@@ -35,6 +39,7 @@ void accept_call() {
 			auto event = boost::make_shared<Events>(fd, kReadEvent);
 			event->setTid(gettid());
 			Eventsops::UpdateLoopEvents(event);
+            printf("in accept_call co use_count=%ld\n", co.use_count());
 		}
     }
 }

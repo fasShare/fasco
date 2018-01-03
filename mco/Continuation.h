@@ -20,7 +20,6 @@ public:
     }
 
     void yield() {
-
         McoYield(co_);
     }
 

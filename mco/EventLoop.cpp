@@ -191,6 +191,7 @@ bool moxie::EventLoop::loop() {
             if (mco) {
                 Mcosops::Resume(mco);
             }
+            LOGGER_TRACE("mco_count:" << mco.use_count());
         }
     } 
     return true;

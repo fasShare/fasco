@@ -48,8 +48,8 @@ ssize_t read(int fd, void *buf, size_t nbyte) {
         } else {
             mco = McoPool::GetCurMco();
             if (mco == nullptr) {
-                fcntl(fd, F_SETFL, flag);
                 ret = uni_read(fd, buf, nbyte);
+                fcntl(fd, F_SETFL, flag);
                 return ret;
             }
             McoPool::SetMcoRoutine(fd, mco);
@@ -100,8 +100,8 @@ int accept(int fd, struct sockaddr *addr, socklen_t *len) {
             std::cout << "no fd mco!" << std::endl;
             mco = McoPool::GetCurMco();
             if (mco == nullptr) {
-                fcntl(fd, F_SETFL, flag);
                 int ret = uni_accept(fd, addr, len);
+                fcntl(fd, F_SETFL, flag);
                 return ret;
             }
             McoPool::SetMcoRoutine(fd, mco);
