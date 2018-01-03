@@ -52,6 +52,19 @@ boost::shared_ptr<Continuation> moxie::McoPool::getMcoRoutine(int fd) {
     }
 }
 
+bool moxie::McoPool::removeMcoRoutine(int fd) {
+	auto tid = gettid();
+	{
+		MutexLocker lock(mutex_);
+		auto umap = fdMcos_.find(tid);
+		if (umap != fdMcos_.end()) {
+			int ret = umap->second.erase(fd);
+			return ret == 1;
+		}
+		return false;
+	}
+}
+
 bool moxie::McoPool::setMcoRoutine(int fd, boost::shared_ptr<Continuation> co) {
     auto tid = gettid();
     {

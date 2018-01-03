@@ -20,6 +20,9 @@ public:
     static boost::shared_ptr<Continuation> GetMcoRoutine(int fd) {
         return Instance()->getMcoRoutine(fd);
     }
+	static bool RemoveMcoRoutine(int fd) {
+		return Instance()->removeMcoRoutine(fd);
+	}
     static bool SetMcoRoutine(int fd, boost::shared_ptr<Continuation> co) {
         return Instance()->setMcoRoutine(fd, co);
     }
@@ -28,6 +31,7 @@ private:
     void setCurMco(boost::shared_ptr<Continuation> mco);
     boost::shared_ptr<Continuation> getMcoRoutine(int fd);
     boost::shared_ptr<Continuation> getMainMco();
+	bool removeMcoRoutine(int fd);
     bool setMcoRoutine(int fd, boost::shared_ptr<Continuation> co);
     static McoPool *Instance() {
         if (instance_ == nullptr) {

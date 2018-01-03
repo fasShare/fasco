@@ -186,8 +186,6 @@ bool moxie::EventLoop::loop() {
                 HandleWake(wakeFd_);
                 continue;
             }
-            // do timer
-            
             // do tcp
             auto mco = McoPool::GetMcoRoutine(event->getFd()); 
             if (mco) {
