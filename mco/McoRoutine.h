@@ -5,6 +5,7 @@
 
 #include <string.h>
 #include <syscall.h>
+#include <iostream>
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
 

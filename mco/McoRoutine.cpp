@@ -2,7 +2,6 @@
 #include <string.h>
 #include <assert.h>
 #include <iostream>
-#include <unordered_map>
 
 #include "Log.h"
 #include "McoRoutine.h"
@@ -14,14 +13,13 @@ extern "C"
 };
 
 static void CoEmpty() {}
-static std::unordered_map<long, McoCallStack*> CallStackMap;
 
 static void CoroutineRun(McoRoutine *co) {
     if (co && co->coctx && co->coctx->corun) {
         try {
             co->coctx->corun();    
         } catch (...) {
-			std::cout << "An exception occur.\n" << std::endl;
+			LOGGER_TRACE("An exception occur.");
         }
     }
     co->done = true;
@@ -177,8 +175,8 @@ void McoYield(McoRoutine *co) {
     co->running = false;
     co->in_callstack = true;
     sink->running = true;
-    //LOGGER_TRACE("will swap co:" << (unsigned long)co);
-    //LOGGER_TRACE("will swap sink:" << (unsigned long)sink);
+    LOGGER_TRACE("will swap co:" << (unsigned long)co << " index:" << cur_index);
+    LOGGER_TRACE("will swap sink:" << (unsigned long)sink << " index:" << cur_index);
 	
 	McoSwap(co, sink);
 }

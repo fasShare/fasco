@@ -23,6 +23,7 @@ void client_call(int fd) {
             break;
         }
 	}
+    printf("exit from client_call.");
 }
 
 void accept_call() {

@@ -9,18 +9,23 @@ FAS_CFLAGS = [
     '-export-dynamic'
     ]
 
-INCLUDE_PATH = ['.', 'mco']
+INCLUDE_PATH = ['.', 'mco', 'base', 'tools']
 
-mco_source = Glob("./mco/*.cpp") + Glob("./mco/*.S")
+mco_source = Glob("./mco/*.cpp") + Glob("./mco/*.S") + Glob("./base/*.cpp")
 StaticLibrary('./lib/mco',
-#SharedLibrary('./lib/mco',
         mco_source,
         LIBPATH = ['lib'],
         CPPPATH = INCLUDE_PATH,
         CCFLAGS = FAS_CFLAGS
         )
 
-Program('./bin/Mco', './test/Main.cpp',
+Program('./bin/Main', './test/Main.cpp',
+        LIBPATH = ['lib'],
+        CPPPATH = INCLUDE_PATH,
+        LIBS = ['mco', 'glog', 'pthread', 'dl'],
+        CCFLAGS = FAS_CFLAGS
+       )
+Program('./bin/Mco', './test/mco.cpp',
         LIBPATH = ['lib'],
         CPPPATH = INCLUDE_PATH,
         LIBS = ['mco', 'glog', 'pthread', 'dl'],

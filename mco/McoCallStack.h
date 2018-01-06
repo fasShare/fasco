@@ -2,7 +2,9 @@
 #define MOXIE_MCOCALLSTACK_H
 #include <map>
 
-#include "Mutex.h"
+#include <Mutex.h>
+#include <CallStack.hpp>
+#include <PoolInThreads.hpp>
 
 using moxie::Mutex;
 class McoRoutine;
@@ -35,27 +37,9 @@ private:
 	size_t curIndex_;
 };
 
-class McoCallStackManager {
-public:
-	static McoCallStack *GetMcoCallStack() {
-		return Instance()->getMcoCallStack();
-	}
-private:
-	McoCallStack *getMcoCallStack();
-	McoCallStackManager() :
-		callStacks_(),
-		mutex_() {
-	}
-	static McoCallStackManager *Instance() {
-		if (!instance_) {
-			instance_ = new McoCallStackManager();
-		}
-		return instance_;
-	}
-
-	static McoCallStackManager *instance_;
-	std::map<long, McoCallStack *> callStacks_;
-	Mutex mutex_;
-};
-McoCallStack *GetMcoCallStack();
+boost::shared_ptr<McoCallStack> GetMcoCallStack();
+//template <class T>
+//boost::shared_ptr<moxie::CallStack<T>> GetMcoCallStack() {
+//    return moxie::PoolInThreads<moxie::CallStack<T>>::Item();
+//}
 #endif //MOXIE_MCOCALLSTACK_H
