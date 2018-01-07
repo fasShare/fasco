@@ -24,7 +24,6 @@ moxie::EventLoop::EventLoop() :
     poll_(new (std::nothrow) Epoll),
     pollDelta_(200),
     events_(),
-    mutable_(),
     mutex_(),
     tid_(gettid()),
     quit_(false),
@@ -57,12 +56,11 @@ bool moxie::EventLoop::updateEvents(boost::shared_ptr<Events> event) {
     if (event->invaild()) {
         return false;
     }
-    if (!(tid_ == gettid())) {
-        MutexLocker lock(mutex_);
-        wakeupLoop();
-        mutable_.push_back(event);
-        return true;
-    }
+    LOGGER_TRACE("loop_tid:" << tid_ << " thread_tid:" << gettid());
+    MutexLocker lock(mutex_);
+    LOGGER_TRACE("Before wakeup!");
+    wakeupLoop();
+    LOGGER_TRACE("after wakeup!");
 
     return pollUpdate(event);
 }
@@ -114,7 +112,7 @@ bool moxie::EventLoop::pollUpdate(boost::shared_ptr<moxie::Events> event) {
         }
         return poll_->EventsMod(event.get());
     } else if (event->isdel()) {
-        LOGGER_TRACE("pollUpdate del");
+        LOGGER_TRACE("pollUpdate del fd:" << event->getFd());
         poll_->EventsDel(event.get());
         assert(events_.erase(event->getFd()));
     }
@@ -162,13 +160,6 @@ bool moxie::EventLoop::loop() {
     while (!quit_) {
         LOGGER_TRACE("start new loopping.");
         occur.clear();
-        {
-            MutexLocker lock(mutex_);
-            for (auto iter = mutable_.begin(); iter != mutable_.end(); ++iter) {
-                LOGGER_TRACE("update enent.");
-                pollUpdate(*iter);
-            }
-        }
 
         looptime = poll_->Loop(occur, 2000000);
         for(auto iter = occur.begin(); iter != occur.end(); iter++) {

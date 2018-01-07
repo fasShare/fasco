@@ -3,7 +3,7 @@ FAS_CFLAGS = [
     '-std=c++11',
 	'-Wno-old-style-cast',
     '-g',
-    '-O2',
+#    '-O2',
     '-export-dynamic',
     '-D_GNU_SOURCE',
     '-D_REENTRANT'
@@ -20,6 +20,12 @@ StaticLibrary('./lib/mco',
         CCFLAGS = FAS_CFLAGS
         )
 
+Program('./bin/MultiServer', './test/MultiThreadServer.cpp',
+        LIBPATH = ['lib'],
+        CPPPATH = INCLUDE_PATH,
+        LIBS = ['mco', 'glog', 'pthread', 'dl'],
+        CCFLAGS = FAS_CFLAGS
+       )
 Program('./bin/Main', './test/Main.cpp',
         LIBPATH = ['lib'],
         CPPPATH = INCLUDE_PATH,

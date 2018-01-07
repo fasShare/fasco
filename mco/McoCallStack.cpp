@@ -7,5 +7,5 @@
 #include <McoCallStack.h>
 
 McoCallStack* GetMcoCallStack() {
-    return moxie::PoolInThreads<McoCallStack>::Item().get();
+    return moxie::PoolInThreads<McoCallStack *>::Item();
 }

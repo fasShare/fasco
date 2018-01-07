@@ -37,9 +37,11 @@ public:
     };
 
     Events(const int fd = -1, uint32_t events = kNoneEvent);
-    Events(const Events& events);
     Events(const struct epoll_event& events);
     Events(const struct pollfd& events);
+    Events(Events&& that);
+    Events& operator=(Events&& that);
+
     ~Events();
 
     bool reset();
@@ -89,6 +91,9 @@ public:
     struct epoll_event epollEvents();
     struct pollfd pollEvents();
 private:
+    Events& operator=(const Events& that);
+    Events(const Events& that);
+
     int fd_;
     long tid_;
     state state_;

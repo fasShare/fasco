@@ -11,35 +11,31 @@ class McoRoutine;
 
 class McoCallStack {
 public:
-	size_t& getCurrIndex() { return curIndex_; }
-	
-	McoRoutine*& operator[](const size_t index) {
-		return callStack_[index];
-	}
+    size_t& getCurrIndex() { return curIndex_; }
 
-	McoRoutine* getCurMco() {
-		if (callStack_.size() > 0) {
-			return callStack_[curIndex_ - 1];
-		}
-		return nullptr;
-	}
+    McoRoutine*& operator[](const size_t index) {
+        return callStack_[index];
+    }
 
-	bool empty() const {
-		return callStack_.size() == 0;
-	}
+    McoRoutine* getCurMco() {
+        if (callStack_.size() > 0) {
+            return callStack_[curIndex_ - 1];
+        }
+        return nullptr;
+    }
 
-	McoCallStack() :
-		callStack_(),
-		curIndex_(0) {
-	}
+    bool empty() const {
+        return callStack_.size() == 0;
+    }
+
+    McoCallStack() :
+        callStack_(),
+        curIndex_(0) {
+        }
 private:
-	std::map<size_t, McoRoutine*> callStack_;
-	size_t curIndex_;
+    std::map<size_t, McoRoutine*> callStack_;
+    size_t curIndex_;
 };
 
 McoCallStack* GetMcoCallStack();
-//template <class T>
-//boost::shared_ptr<moxie::CallStack<T>> GetMcoCallStack() {
-//    return moxie::PoolInThreads<moxie::CallStack<T>>::Item();
-//}
 #endif //MOXIE_MCOCALLSTACK_H

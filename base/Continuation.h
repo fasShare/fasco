@@ -10,7 +10,7 @@ public:
         co_(nullptr) {
         co_ = McoCreate(call);
     }
-    
+
     Continuation (McoRoutine *co) :
         co_(co) {
     }

@@ -7,16 +7,16 @@ typedef void (*cofunc) (void *);
 #if defined(__i386__)
 struct Mcontext
 {
-	void *regs[9];
-	size_t ss_size;
-	char *ss_sp;
+    void *regs[9];
+    size_t ss_size;
+    char *ss_sp;
 };
 #elif defined(__x86_64__)
 struct Mcontext
 {
-	void *regs[17];
-	size_t ss_size;
-	char *ss_sp;
+    void *regs[17];
+    size_t ss_size;
+    char *ss_sp;
 };
 #endif 
 int McontextInit(Mcontext *ctx);

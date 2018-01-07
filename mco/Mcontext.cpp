@@ -31,40 +31,40 @@
 
 #if defined(__i386__)
 int McontextInit(Mcontext *ctx) {
-	memset(ctx, 0, sizeof(*ctx));
-	return 0;
+    memset(ctx, 0, sizeof(*ctx));
+    return 0;
 }
 int McontextMake(Mcontext *ctx, cofunc pfn, const void *s) {
     memset(ctx->regs, 0, sizeof(ctx->regs));
-    
+
     char *sp = ctx->ss_sp + ctx->ss_size - sizeof(void *);
     sp = (char*) ((unsigned long)sp & -16L);
     unsigned int *p = (unsigned int *)sp;
     *p = (unsigned int)s;
-	// popl %esp 完成以下两件事
-	// (1) movl (ctx->regs[ESP]), %rsp
-	// (2) subl 4, %esp 
-	ctx->regs[ESP] = sp - sizeof(p);
-	ctx->regs[ERET] = (void *)pfn;
-	return 0;
+    // popl %esp 完成以下两件事
+    // (1) movl (ctx->regs[ESP]), %rsp
+    // (2) subl 4, %esp 
+    ctx->regs[ESP] = sp - sizeof(p);
+    ctx->regs[ERET] = (void *)pfn;
+    return 0;
 }
 #elif defined(__x86_64__)
 int McontextMake(Mcontext *ctx, cofunc pfn, const void *conarg) {
     memset(ctx->regs, 0, sizeof(ctx->regs));
-    
+
     char *sp = ctx->ss_sp + ctx->ss_size - 1;
     sp = (char*) ((unsigned long)sp & -16LL  );
 
     ctx->regs[RDI] = (void *)conarg;
-	// x86_64可以通过寄存器传参，而i386通过堆栈传参
-	ctx->regs[RSP] = sp - 8;
-	ctx->regs[RET] = (void *)pfn;
-	return 0;
+    // x86_64可以通过寄存器传参，而i386通过堆栈传参
+    ctx->regs[RSP] = sp - 8;
+    ctx->regs[RET] = (void *)pfn;
+    return 0;
 }
 
 int McontextInit(Mcontext *ctx) {
-	memset(ctx, 0, sizeof(*ctx));
-	return 0;
+    memset(ctx, 0, sizeof(*ctx));
+    return 0;
 }
 #endif
 

@@ -51,7 +51,6 @@ private:
     int pollDelta_;
 
     std::unordered_map<int, boost::shared_ptr<Events>> events_;
-    std::vector<boost::shared_ptr<Events>> mutable_;
     
     Mutex mutex_;
     long tid_;

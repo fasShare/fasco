@@ -33,7 +33,7 @@ public:
     bool bind(const NetAddress& addr);
     bool listen(int backlog);
     bool connect(const NetAddress& addr);
-    int accept(NetAddress& addr, bool noblockingexec);
+    int accept(NetAddress& addr, bool noblockingexec = false);
 	void close();
 private:
     int socket_;

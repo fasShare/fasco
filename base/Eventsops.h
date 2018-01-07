@@ -14,7 +14,7 @@ public:
     static bool RemoveEventFromLoop(boost::shared_ptr<Events> event) {
         auto loop = EventLoopPool::GetLoop(event->getTid());
         if (!loop) {
-			assert(false);
+            assert(false);
             return false;
         }
         event->setState(Events::state::DEL);
@@ -23,7 +23,6 @@ public:
 	static bool UpdateLoopEvents(boost::shared_ptr<Events> event) {
 		auto loop = EventLoopPool::GetLoop(event->getTid());
 		if (!loop) {
-			assert(false);
 			return false;
 		}
 		return loop->updateEvents(event);

@@ -2,13 +2,16 @@
 #include <EventLoopPool.h>
 #include <Continuation.h>
 #include <NetAddress.h>
-#include <Mcosops.h>
 #include <Socket.h>
+#include <McoPool.h>
+#include <Mcosops.h>
 #include <Events.h>
 #include <Eventsops.h>
 #include <boost/make_shared.hpp>
 
 using namespace moxie;
+
+extern bool hookable;
 
 void client_call(int fd) {
 	while (true) {
@@ -18,7 +21,7 @@ void client_call(int fd) {
 			buf[ret] = 0;
 			printf("recv:%s\n", buf);
 		} else {
-            printf("read error:%s\n", strerror(errno));
+            printf("read error:%s, ret = %d\n", strerror(errno), ret);
             close(fd);
             break;
         }
@@ -46,6 +49,7 @@ void accept_call() {
 }
 
 int main () {
+    hookable = true;
     EventLoop *loop = new EventLoop;
     EventLoopPool::AddEventLoop(loop);
     

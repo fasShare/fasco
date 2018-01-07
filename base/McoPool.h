@@ -21,6 +21,9 @@ public:
     static void SetMcoRoutine(int fd, boost::shared_ptr<Continuation> co) {
         GetMcoPool()->setMcoRoutine(fd, co);
     }
+    static void SetMcoRoutine(int fd, boost::shared_ptr<Continuation> co, long tid) {
+        GetMcoPool(tid)->setMcoRoutine(fd, co);
+    }
     static boost::shared_ptr<Continuation> GetCurMco() {
         return GetMcoPool()->getCurMco();
     }
@@ -29,6 +32,9 @@ public:
     }
     static boost::shared_ptr<McoPool> GetMcoPool() {
         return PoolInThreads<McoPool>::Item();
+    }
+    static boost::shared_ptr<McoPool> GetMcoPool(long tid) {
+        return PoolInThreads<McoPool>::Item(tid);
     }
     boost::shared_ptr<Continuation> getCurMco() { return cur_; }
     void setCurMco(boost::shared_ptr<Continuation> mco) { cur_ = mco; }

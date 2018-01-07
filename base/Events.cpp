@@ -2,8 +2,11 @@
 
 #include <Events.h>
 
+#define gettid() (::syscall(SYS_gettid))
+
 moxie::Events::Events(const int fd, uint32_t events) :
     fd_(fd),
+    tid_(gettid()),
     state_(state::NEW),
     type_(EVENT_TYPE_START),
     eorigin_(events),
@@ -21,6 +24,24 @@ moxie::Events::Events(const struct epoll_event& events) :
 
 moxie::Events::Events(const struct pollfd& events) :
     Events(events.fd, events.revents) {
+}
+
+moxie::Events::Events(moxie::Events&& that) {
+    *this = std::move(that);
+}
+
+moxie::Events& moxie::Events::operator=(moxie::Events&& that) {
+    if (&that == this) {
+        return *this;
+    }
+    this->fd_ = that.fd_;
+    this->tid_ = that.tid_;
+    this->type_= that.type_;
+    this->state_ = that.state_;
+    this->eorigin_ = that.eorigin_;
+    this->mutable_ = that.mutable_;
+    that.reset();
+    return *this;
 }
 
 bool moxie::Events::reset() {
