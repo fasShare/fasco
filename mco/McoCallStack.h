@@ -37,7 +37,7 @@ private:
 	size_t curIndex_;
 };
 
-boost::shared_ptr<McoCallStack> GetMcoCallStack();
+McoCallStack* GetMcoCallStack();
 //template <class T>
 //boost::shared_ptr<moxie::CallStack<T>> GetMcoCallStack() {
 //    return moxie::PoolInThreads<moxie::CallStack<T>>::Item();

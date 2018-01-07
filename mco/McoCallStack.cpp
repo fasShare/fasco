@@ -6,6 +6,6 @@
 #include <McoRoutine.h>
 #include <McoCallStack.h>
 
-boost::shared_ptr<McoCallStack> GetMcoCallStack() {
-    return moxie::PoolInThreads<McoCallStack>::Item();
+McoCallStack* GetMcoCallStack() {
+    return moxie::PoolInThreads<McoCallStack>::Item().get();
 }

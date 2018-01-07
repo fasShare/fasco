@@ -1,15 +1,16 @@
 FAS_CFLAGS = [
 	'-Wall',
-    '-fPIC',
     '-std=c++11',
 	'-Wno-old-style-cast',
     '-g',
+    '-O2',
+    '-export-dynamic',
     '-D_GNU_SOURCE',
-    '-D_REENTRANT',
-    '-export-dynamic'
+    '-D_REENTRANT'
     ]
 
 INCLUDE_PATH = ['.', 'mco', 'base', 'tools']
+#INCLUDE_PATH = ['.', 'mco', 'base', 'tools', '/usr/include/i386-linux-gnu/c++/6']
 
 mco_source = Glob("./mco/*.cpp") + Glob("./mco/*.S") + Glob("./base/*.cpp")
 StaticLibrary('./lib/mco',
