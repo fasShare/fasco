@@ -175,18 +175,27 @@ void McoYield(McoRoutine *co) {
     McoSwap(co, sink);
 }
 void McoFree(McoRoutine *co) {
-    if (!co || co->running) {
+    LOGGER_TRACE("before !co=" << (unsigned long)co);
+    if (!co) {
+        LOGGER_TRACE("co with nullptr will be free. may be a bug");
+        return;
+    }
+    LOGGER_TRACE("before co->running.");
+    if (co->running) {
         co->should_close = true;
         return;
     }
+     LOGGER_TRACE("before GetCommonOccupy");
     auto cop = GetCommonOccupy();
     if (cop == co) {
         SetCommonOccupy(nullptr);
     }
+     LOGGER_TRACE("before GetEnvPenging");
     auto up_pending = GetEnvPenging();
     if (up_pending == co) {
         SetEnvPenging(nullptr);
     }
+    LOGGER_TRACE("before GetEnvOccupy");
     auto up_occupy = GetEnvOccupy();
     if (up_occupy == co) {
         SetEnvOccupy(nullptr);

@@ -110,6 +110,7 @@ void StoreUsedCommonStack(McoStack* stack) {
 }
 
 void RecoverUsedCommonStack(McoStack* stack) {
+    LOGGER_TRACE("stack_addr:" << (unsigned long)stack);
 	if (stack->restore_size == 0) {
 		return;
 	}

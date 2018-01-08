@@ -1,8 +1,11 @@
 #include <strings.h>
+#include <dlfcn.h>
 
 #include <Events.h>
 
 #define gettid() (::syscall(SYS_gettid))
+using close_hook = int (*)(int fd);
+static close_hook uni_close = (close_hook)dlsym(RTLD_NEXT, "close");
 
 moxie::Events::Events(const int fd, uint32_t events) :
     fd_(fd),
@@ -185,7 +188,7 @@ struct pollfd moxie::Events::pollEvents() {
 }
 
 moxie::Events::~Events() {
-    ::close(fd_);
+    ::uni_close(fd_);
     LOGGER_TRACE("Events destroyed.");
 }
 

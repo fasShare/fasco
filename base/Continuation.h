@@ -24,8 +24,9 @@ public:
     }
 
     ~Continuation() {
+        LOGGER_TRACE("Mco will destroyed co="<< (unsigned long)co_);
         McoFree(co_);
-        std::cout << "Mco will destroyed!" << std::endl;
+        LOGGER_TRACE("Mco will destroyed!");
     }
 private:
     McoRoutine *co_;

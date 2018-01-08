@@ -2,6 +2,7 @@
 #define MOXIE_MCOROUTINE_H
 #include "Mcontext.h"
 #include "McoStack.h"
+#include "Log.h"
 
 #include <string.h>
 #include <syscall.h>
@@ -47,6 +48,9 @@ struct McoRoutine {
         done(false),
         done_yield(false),
         stack_store(false) {
+        }
+        ~McoRoutine() {
+            LOGGER_TRACE("McoRoutine will be destroyed.");
         }
 };
 
