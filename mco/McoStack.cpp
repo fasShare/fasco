@@ -88,6 +88,7 @@ void RecycleMcoStack(McoStack*& stack) {
 }
 
 void StoreUsedCommonStack(McoStack* stack) {
+    LOGGER_TRACE("stack_addr:" << (unsigned long)stack);
     if (!stack || (stack && stack->is_private)) {
 		return;
 	}
@@ -140,5 +141,5 @@ void SetEnvPenging(McoRoutine *co) {
 }
 
 McoStackManager* GetMcoStackMgr() {
-    return moxie::PoolInThreads<McoStackManager*>::Item();
+    return moxie::PoolInThreads<McoStackManager *>::Item();
 }

@@ -169,8 +169,8 @@ void McoYield(McoRoutine *co) {
     co->running = false;
     co->in_callstack = true;
     sink->running = true;
-    //LOGGER_TRACE("will swap co:" << (unsigned long)co << " index:" << cur_index);
-    //LOGGER_TRACE("will swap sink:" << (unsigned long)sink << " index:" << cur_index);
+    LOGGER_TRACE("will swap co:" << (unsigned long)co << " index:" << cur_index);
+    LOGGER_TRACE("will swap sink:" << (unsigned long)sink << " index:" << cur_index);
 
     McoSwap(co, sink);
 }

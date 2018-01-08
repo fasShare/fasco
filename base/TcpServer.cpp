@@ -36,17 +36,17 @@ bool moxie::TcpServer::start() {
     return true;
 }
 
-void client_call(int fd) {
+void client_call(boost::shared_ptr<moxie::Events> event) {
     while (true) {
         LOGGER_TRACE("==================Begin read========================");
         char buf[1024];
-        int ret = read(fd, buf, 1023);
+        int ret = read(event->getFd(), buf, 1023);
         if (ret > 0) {
             buf[ret] = 0;
             LOGGER_TRACE("recv:"<< buf);
         } else {
             LOGGER_TRACE("read error:"<< strerror(errno) << ", ret:" << ret);
-            close(fd);
+            close(event->getFd());
             break;
         }
         LOGGER_TRACE("==================After read========================");
@@ -66,7 +66,7 @@ void moxie::TcpServer::accept() {
             auto loop = EventLoopPool::GetNextLoop();
             auto event = boost::make_shared<Events>(fd, kReadEvent);
             long tid = loop->getTid();
-            boost::shared_ptr<Continuation> co(new Continuation(boost::bind(client_call, fd)));
+            boost::shared_ptr<Continuation> co(new Continuation(boost::bind(client_call, event)));
             McoPool::SetMcoRoutine(fd, co, tid);
             event->setTid(tid);
             loop->updateEvents(event);

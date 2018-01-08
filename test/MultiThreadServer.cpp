@@ -21,8 +21,12 @@ int main() {
     EventLoop *mainloop = new EventLoop;
     EventLoopPool::addMainLoop(mainloop);
     Thread thread0(LoopThreadFunc);
+    Thread thread1(LoopThreadFunc);
+    Thread thread2(LoopThreadFunc);
 
     thread0.start();
+    thread1.start();
+    thread2.start();
     
     NetAddress addr(AF_INET, 6686, "127.0.0.1");
     TcpServer server(addr);

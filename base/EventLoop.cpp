@@ -163,8 +163,12 @@ bool moxie::EventLoop::loop() {
 
         looptime = poll_->Loop(occur, 2000000);
         for(auto iter = occur.begin(); iter != occur.end(); iter++) {
-            auto events = events_.find(iter->fd);
-            if (events == events_.end()) {
+            decltype(events_.begin()) events;
+			{
+				MutexLocker lock(mutex_);
+				events = events_.find(iter->fd);
+			}
+			if (events == events_.end()) {
                 continue;
             }
             auto& event = events->second;
