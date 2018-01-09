@@ -23,7 +23,7 @@ static void CoroutineRun(McoRoutine *co) {
         }
     }
     co->done = true;
-    //LOGGER_TRACE("Before run yield");
+    LOGGER_TRACE("Before run yield");
     McoYield(co);
 }
 
@@ -83,9 +83,12 @@ void McoSwap(McoRoutine *sink, McoRoutine *co) {
     if (!co->coctx->stack->is_private) {
         auto occupy_co_tmp = GetCommonOccupy();
         SetCommonOccupy(co);
-        if (occupy_co_tmp && occupy_co_tmp != co 
-                && !(occupy_co_tmp->done && occupy_co_tmp->done_yield)) {
+        if (occupy_co_tmp
+			&& occupy_co_tmp != co 
+            && !(occupy_co_tmp->done && occupy_co_tmp->done_yield)) {
             occupy_co_tmp->stack_store = true;
+			LOGGER_TRACE("occupy_stack_item:" << (unsigned long)(occupy_co_tmp->coctx->stack));
+			LOGGER_TRACE("occupy_stack:" << (unsigned long)(occupy_co_tmp->coctx->stack->stack));
             StoreUsedCommonStack(occupy_co_tmp->coctx->stack);
         }
     }
@@ -144,8 +147,8 @@ void McoResume(McoRoutine *co) {
         co->in_callstack = true;
         LOGGER_TRACE("will resume co:" << (unsigned long)co);
         LOGGER_TRACE("will resume sink:" << (unsigned long)(co->sink));
-        //LOGGER_TRACE("co stack:" << (unsigned long)(co->coctx->stack->stack));
-        //LOGGER_TRACE("sink stack:" << (unsigned long)(co->sink->coctx->stack->stack));
+        LOGGER_TRACE("co stack:" << (unsigned long)(co->coctx->stack->stack));
+        LOGGER_TRACE("sink stack:" << (unsigned long)(co->sink->coctx->stack->stack));
         McoSwap(co->sink, co);
     } else {
         McoYield(cur_co);
@@ -189,16 +192,6 @@ void McoFree(McoRoutine *co) {
     auto cop = GetCommonOccupy();
     if (cop == co) {
         SetCommonOccupy(nullptr);
-    }
-     LOGGER_TRACE("before GetEnvPenging");
-    auto up_pending = GetEnvPenging();
-    if (up_pending == co) {
-        SetEnvPenging(nullptr);
-    }
-    LOGGER_TRACE("before GetEnvOccupy");
-    auto up_occupy = GetEnvOccupy();
-    if (up_occupy == co) {
-        SetEnvOccupy(nullptr);
     }
     LOGGER_TRACE("Begin RecycleMcoStack.");
     RecycleMcoStack(co->coctx->stack);

@@ -21,7 +21,6 @@ McoStack* McoStackManager::createCommonMcoStack() {
     stack->restore_size = 0;
 	stack->stack_tmp = nullptr;
 	stack->is_private = false;
-	stacks_.insert(stack);
 	return stack;
 }
 
@@ -31,22 +30,20 @@ McoStack* McoStackManager::createPrivateMcoStack() {
 	stack->size = privateSize_;
 	stack->stack_tmp = nullptr;
 	stack->is_private = true;
-	stacks_.insert(stack);
 	return stack;
 }
 
 void McoStackManager::recyclePrivateStack(McoStack*& stack) {
 	delete stack->stack;
 	delete stack->stack_tmp;
-    stacks_.erase(stack);
     delete stack;
+	stack = nullptr;
 }
 
 void McoStackManager::recycleCommonStack(McoStack*& stack) {
 	if (stack->stack_tmp) {
         delete stack->stack_tmp;
     }
-    stacks_.erase(stack);
     stack->stack = nullptr;
     delete stack;
     stack = nullptr;
@@ -57,9 +54,7 @@ McoStackManager::McoStackManager(const size_t commonSize, size_t privateSize) :
 	privateSize_(privateSize),
 	commonStack_(nullptr),
 	ready_(true),
-    commonOccupy_(nullptr),
-    envOccupy_(nullptr),
-    envPending_(nullptr) {
+    commonOccupy_(nullptr) {
 	try {
         commonStack_ = new char[commonSize_];
         if(commonSize_ & 0xFFF) {
@@ -128,18 +123,18 @@ void SetCommonOccupy(McoRoutine *co) {
     GetMcoStackMgr()->setCommonOccupy(co);
 }
 
-McoRoutine *GetEnvOccupy() {
-	return GetMcoStackMgr()->getEnvOccupy();
-}
-void SetEnvOccupy(McoRoutine *co) {
-	GetMcoStackMgr()->setEnvOccupy(co);
-}
-McoRoutine *GetEnvPenging() {
-	return GetMcoStackMgr()->getEnvPenging();
-}
-void SetEnvPenging(McoRoutine *co) {
-    GetMcoStackMgr()->setEnvPenging(co);
-}
+//McoRoutine *GetEnvOccupy() {
+//	return GetMcoStackMgr()->getEnvOccupy();
+//}
+//void SetEnvOccupy(McoRoutine *co) {
+//	GetMcoStackMgr()->setEnvOccupy(co);
+//}
+//McoRoutine *GetEnvPenging() {
+//	return GetMcoStackMgr()->getEnvPenging();
+//}
+//void SetEnvPenging(McoRoutine *co) {
+//   GetMcoStackMgr()->setEnvPenging(co);
+//}
 
 McoStackManager* GetMcoStackMgr() {
     return moxie::PoolInThreads<McoStackManager *>::Item();

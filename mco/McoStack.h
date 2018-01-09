@@ -42,10 +42,10 @@ public:
     McoRoutine *getCommonOccupy() { return commonOccupy_; }
     void setCommonOccupy(McoRoutine *co) { commonOccupy_ = co; }
 
-    McoRoutine *getEnvOccupy() { return envOccupy_; }
-    void setEnvOccupy(McoRoutine *co) { envOccupy_ = co; }
-    McoRoutine *getEnvPenging() { return envPending_; }
-    void setEnvPenging(McoRoutine *co) { envPending_ = co; }
+//    McoRoutine *getEnvOccupy() { return envOccupy_; }
+//    void setEnvOccupy(McoRoutine *co) { envOccupy_ = co; }
+//    McoRoutine *getEnvPenging() { return envPending_; }
+//    void setEnvPenging(McoRoutine *co) { envPending_ = co; }
 private:
     std::set<McoStack *> stacks_;
     size_t commonSize_;
@@ -53,8 +53,8 @@ private:
     char *commonStack_;
     bool ready_;
     McoRoutine *commonOccupy_;
-    McoRoutine *envOccupy_;
-    McoRoutine *envPending_;
+//    McoRoutine *envOccupy_;
+//    McoRoutine *envPending_;
 };
 
 McoStackManager* GetMcoStackMgr();
