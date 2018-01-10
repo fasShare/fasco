@@ -19,8 +19,11 @@ struct McoContext {
     McoStack* stack;
     CoCallback corun;
     bool use_private;
-    void *args;
     ~McoContext () {
+		delete stack;
+		stack = nullptr;
+		delete ctx;
+		ctx = nullptr;
         std::cout << "McoContext will be destroyed!" << std::endl;
     }
 };
@@ -48,19 +51,12 @@ struct McoRoutine {
         done(false),
         done_yield(false),
         stack_store(false) {
-        }
-        ~McoRoutine() {
-            LOGGER_TRACE("McoRoutine will be destroyed.");
-        }
-};
-
-struct McoSwapContext {
-    struct McoRoutine *occupy;
-    struct McoRoutine *pending;
-    McoSwapContext() {
-        occupy = nullptr;
-        pending = nullptr;
-    }
+	}
+	~McoRoutine() {
+		delete coctx;
+		coctx = nullptr;
+		LOGGER_TRACE("McoRoutine will be destroyed.");
+	}
 };
 
 bool InitMcoContext(McoRoutine *co, CoCallback run, bool use_private = false);
@@ -70,4 +66,4 @@ void McoResume(McoRoutine *co);
 void McoYield(McoRoutine *co);
 void McoFree(McoRoutine *co);
 McoRoutine *MainMco();
-#endif //MOXIE_MCOROUTINE_H
+#endif

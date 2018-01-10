@@ -31,9 +31,7 @@ void SwapMcoContext(McoContext *cur, McoContext *co) {
     if (!cur || !co) {
         return;
     }
-    auto cur_ctx = cur->ctx;
-    auto co_ctx = co->ctx;
-    if (!cur_ctx || !co_ctx) {
+    if (!cur->ctx || !co->ctx) {
         return;
     }
     mcontext_swap(cur->ctx, co->ctx);
@@ -105,14 +103,14 @@ void McoSwap(McoRoutine *sink, McoRoutine *co) {
 
 McoRoutine *MainMco() {
     auto callstack = GetMcoCallStack();
-    auto& cur_index = callstack->getCurrIndex();
-    if (cur_index == 0) {
+    auto& index = callstack->getCurrIndex();
+    if (index == 0) {
         auto sink = McoCreate(CoEmpty, true);
         if (!InitMcoContext(sink)) {
             return nullptr;
         }
         McontextMake(sink->coctx->ctx, (cofunc)(CoroutineRun), (void *)sink);
-        (*callstack)[cur_index++] = sink;
+        (*callstack)[index++] = sink;
         sink->is_main = true;
         sink->start = true;
         sink->running = true;
@@ -126,12 +124,12 @@ void McoResume(McoRoutine *co) {
         return;
     }
     auto callstack = GetMcoCallStack();
-    auto& cur_index = callstack->getCurrIndex();
-    if (cur_index == 0) {
+    auto& index = callstack->getCurrIndex();
+    if (index == 0) {
         MainMco();
     }
     // 如果当前协程是从co切换过来的，此时应该使用yield，而不是resume，不然会导致栈区的重复保存。 
-    auto cur_co = (*callstack)[cur_index-1];
+    auto cur_co = (*callstack)[index-1];
     if (cur_co->sink != co) {
         if (!co->start) {
             if (!InitMcoContext(co)) {
@@ -141,8 +139,8 @@ void McoResume(McoRoutine *co) {
             McontextMake(co->coctx->ctx, (cofunc)(CoroutineRun), (void *)co);
         }
         co->running = true;
-        (*callstack)[cur_index++] = co;
-        co->sink = (*callstack)[cur_index-2];
+        (*callstack)[index++] = co;
+        co->sink = (*callstack)[index-2];
         co->sink->running = false;
         co->in_callstack = true;
         LOGGER_TRACE("will resume co:" << (unsigned long)co);
@@ -164,16 +162,16 @@ void McoYield(McoRoutine *co) {
         co->start = false;
     }
     auto callstack = GetMcoCallStack();
-    auto& cur_index = callstack->getCurrIndex();
+    auto& index = callstack->getCurrIndex();
 
     auto sink = co->sink;
-    assert(sink == (*callstack)[cur_index-2]);
-    cur_index--;
+    assert(sink == (*callstack)[index-2]);
+    index--;
     co->running = false;
     co->in_callstack = true;
     sink->running = true;
-    LOGGER_TRACE("will swap co:" << (unsigned long)co << " index:" << cur_index);
-    LOGGER_TRACE("will swap sink:" << (unsigned long)sink << " index:" << cur_index);
+    LOGGER_TRACE("will swap co:" << (unsigned long)co << " index:" << index);
+    LOGGER_TRACE("will swap sink:" << (unsigned long)sink << " index:" << index);
 
     McoSwap(co, sink);
 }
@@ -188,7 +186,7 @@ void McoFree(McoRoutine *co) {
         co->should_close = true;
         return;
     }
-     LOGGER_TRACE("before GetCommonOccupy");
+    LOGGER_TRACE("before GetCommonOccupy");
     auto cop = GetCommonOccupy();
     if (cop == co) {
         SetCommonOccupy(nullptr);
@@ -200,15 +198,6 @@ void McoFree(McoRoutine *co) {
     co->done_yield = true;
     co->running = false;
     co->start = false;
-
-    LOGGER_TRACE("Begin delete ctx");
-    delete co->coctx->ctx;
-    co->coctx->ctx = nullptr;
-    co->coctx->args = nullptr;
-
-    LOGGER_TRACE("Begin delete coctx");
-    delete co->coctx;
-    co->coctx = nullptr;
 
     LOGGER_TRACE("Begin delete co");
     delete co;

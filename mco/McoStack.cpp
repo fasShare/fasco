@@ -34,19 +34,11 @@ McoStack* McoStackManager::createPrivateMcoStack() {
 }
 
 void McoStackManager::recyclePrivateStack(McoStack*& stack) {
-	delete stack->stack;
-	delete stack->stack_tmp;
-    delete stack;
-	stack = nullptr;
+	(void)stack;
 }
 
 void McoStackManager::recycleCommonStack(McoStack*& stack) {
-	if (stack->stack_tmp) {
-        delete stack->stack_tmp;
-    }
-    stack->stack = nullptr;
-    delete stack;
-    stack = nullptr;
+	(void)stack;
 }
 
 McoStackManager::McoStackManager(const size_t commonSize, size_t privateSize) :
@@ -56,11 +48,11 @@ McoStackManager::McoStackManager(const size_t commonSize, size_t privateSize) :
 	ready_(true),
     commonOccupy_(nullptr) {
 	try {
-        commonStack_ = new char[commonSize_];
         if(commonSize_ & 0xFFF) {
             commonSize_ &= ~0xFFF;
             commonSize_ += 0x1000;
         }
+        commonStack_ = new char[commonSize_];
     } catch (...) {
         ready_ = false;
     }
@@ -75,16 +67,12 @@ McoStack* CreatePrivateMcoStack() {
 }
 
 void RecycleMcoStack(McoStack*& stack) {
-	if (stack->is_private) {
-		GetMcoStackMgr()->recyclePrivateStack(stack);
-	} else {
-		GetMcoStackMgr()->recycleCommonStack(stack);
-	}
+	(void)stack;
 }
 
 void StoreUsedCommonStack(McoStack* stack) {
     LOGGER_TRACE("stack_addr:" << (unsigned long)stack);
-    if (!stack || (stack && stack->is_private)) {
+    if (!stack || stack->is_private) {
 		return;
 	}
     
@@ -106,7 +94,7 @@ void StoreUsedCommonStack(McoStack* stack) {
 
 void RecoverUsedCommonStack(McoStack* stack) {
     LOGGER_TRACE("stack_addr:" << (unsigned long)stack);
-	if (stack->restore_size == 0) {
+	if (!stack || stack->restore_size == 0) {
 		return;
 	}
     
@@ -122,19 +110,6 @@ McoRoutine *GetCommonOccupy() {
 void SetCommonOccupy(McoRoutine *co) {
     GetMcoStackMgr()->setCommonOccupy(co);
 }
-
-//McoRoutine *GetEnvOccupy() {
-//	return GetMcoStackMgr()->getEnvOccupy();
-//}
-//void SetEnvOccupy(McoRoutine *co) {
-//	GetMcoStackMgr()->setEnvOccupy(co);
-//}
-//McoRoutine *GetEnvPenging() {
-//	return GetMcoStackMgr()->getEnvPenging();
-//}
-//void SetEnvPenging(McoRoutine *co) {
-//   GetMcoStackMgr()->setEnvPenging(co);
-//}
 
 McoStackManager* GetMcoStackMgr() {
     return moxie::PoolInThreads<McoStackManager *>::Item();

@@ -27,7 +27,19 @@ struct McoStack {
         stack_tmp(nullptr),
         is_private(false),
         restore_size(0) {
-        }
+    }
+	~McoStack() {
+		restore_size = 0;
+		delete stack_tmp;
+		stack_tmp = nullptr;
+		stack_sp = nullptr;
+		stack_bp = nullptr;
+		size = 0;
+		if (is_private) {
+			delete stack;
+		}
+		stack = nullptr;
+	}
 };
 
 class McoStackManager {
@@ -41,20 +53,12 @@ public:
 
     McoRoutine *getCommonOccupy() { return commonOccupy_; }
     void setCommonOccupy(McoRoutine *co) { commonOccupy_ = co; }
-
-//    McoRoutine *getEnvOccupy() { return envOccupy_; }
-//    void setEnvOccupy(McoRoutine *co) { envOccupy_ = co; }
-//    McoRoutine *getEnvPenging() { return envPending_; }
-//    void setEnvPenging(McoRoutine *co) { envPending_ = co; }
 private:
-    std::set<McoStack *> stacks_;
     size_t commonSize_;
     size_t privateSize_;
     char *commonStack_;
     bool ready_;
     McoRoutine *commonOccupy_;
-//    McoRoutine *envOccupy_;
-//    McoRoutine *envPending_;
 };
 
 McoStackManager* GetMcoStackMgr();
@@ -68,9 +72,4 @@ void RecoverUsedCommonStack(McoStack* stack);
 
 McoRoutine *GetCommonOccupy();
 void SetCommonOccupy(McoRoutine *co);
-
-McoRoutine *GetEnvOccupy();
-void SetEnvOccupy(McoRoutine *co);
-McoRoutine *GetEnvPenging();
-void SetEnvPenging(McoRoutine *co);
 #endif //MOXIE_MCOSTACK_H
