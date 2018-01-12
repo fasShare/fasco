@@ -16,12 +16,8 @@ using CoCallback = boost::function<void ()>;
 
 struct McoContext {
     struct Mcontext *ctx;
-    McoStack* stack;
     CoCallback corun;
-    bool use_private;
     ~McoContext () {
-		delete stack;
-		stack = nullptr;
 		delete ctx;
 		ctx = nullptr;
         std::cout << "McoContext will be destroyed!" << std::endl;
@@ -32,6 +28,9 @@ struct McoContext {
 struct McoRoutine {
     McoContext *coctx;
     struct McoRoutine *sink;
+    McoStack* stack;
+	McoStackManager *stackMgr;
+    bool use_private;
     bool is_main;
     bool in_callstack;
     bool should_close;
@@ -43,6 +42,9 @@ struct McoRoutine {
     McoRoutine() :
         coctx(nullptr),
         sink(nullptr),
+		stack(nullptr),
+		stackMgr(nullptr),
+		use_private(nullptr),
         is_main(false),
         in_callstack(false),
         should_close(false),
@@ -53,6 +55,9 @@ struct McoRoutine {
         stack_store(false) {
 	}
 	~McoRoutine() {
+		stackMgr = nullptr;
+		delete stack;
+		stack = nullptr;
 		delete coctx;
 		coctx = nullptr;
 		LOGGER_TRACE("McoRoutine will be destroyed.");

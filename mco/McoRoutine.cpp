@@ -44,16 +44,16 @@ bool InitMcoContext(McoRoutine *co) {
         return false;
     }
     McontextInit(coctx->ctx);
-    if (!coctx->use_private) {
-        coctx->stack = CreateCommonMcoStack();
+    if (!co->use_private) {
+        co->stack = co->stackMgr->createCommonMcoStack();
     } else {
-        coctx->stack = CreatePrivateMcoStack();
+        co->stack = co->stackMgr->createPrivateMcoStack();
     }
-    if (!coctx->stack) {
+    if (!co->stack) {
         return false;
     }
-    coctx->ctx->ss_sp = coctx->stack->stack;
-    coctx->ctx->ss_size = coctx->stack->size;
+    coctx->ctx->ss_sp = co->stack->stack;
+    coctx->ctx->ss_size = co->stack->size;
 
     return true;
 }
@@ -68,7 +68,7 @@ McoRoutine *McoCreate(CoCallback run, bool use_private) {
         return nullptr;
     }
     mco->coctx->corun = run;
-    mco->coctx->use_private = use_private;
+    mco->use_private = use_private;
 
     mco->sink = nullptr;
     mco->is_main = false;
@@ -77,17 +77,17 @@ McoRoutine *McoCreate(CoCallback run, bool use_private) {
 
 void McoSwap(McoRoutine *sink, McoRoutine *co) {
     char c; 
-    sink->coctx->stack->stack_sp = &c;
-    if (!co->coctx->stack->is_private) {
+    sink->stack->stack_sp = &c;
+    if (!co->stack->is_private) {
         auto occupy_co_tmp = GetCommonOccupy();
         SetCommonOccupy(co);
         if (occupy_co_tmp
 			&& occupy_co_tmp != co 
             && !(occupy_co_tmp->done && occupy_co_tmp->done_yield)) {
             occupy_co_tmp->stack_store = true;
-			LOGGER_TRACE("occupy_stack_item:" << (unsigned long)(occupy_co_tmp->coctx->stack));
-			LOGGER_TRACE("occupy_stack:" << (unsigned long)(occupy_co_tmp->coctx->stack->stack));
-            StoreUsedCommonStack(occupy_co_tmp->coctx->stack);
+			LOGGER_TRACE("occupy_stack_item:" << (unsigned long)(occupy_co_tmp->stack));
+			LOGGER_TRACE("occupy_stack:" << (unsigned long)(occupy_co_tmp->stack->stack));
+            StoreUsedCommonStack(occupy_co_tmp->stack);
         }
     }
 
@@ -95,9 +95,9 @@ void McoSwap(McoRoutine *sink, McoRoutine *co) {
 
     auto callstack = GetMcoCallStack();
     auto cur_co = callstack->getCurMco();
-    if (cur_co && !cur_co->coctx->stack->is_private && cur_co->stack_store) {
+    if (cur_co && !cur_co->stack->is_private && cur_co->stack_store) {
         cur_co->stack_store = false;
-        RecoverUsedCommonStack(cur_co->coctx->stack);
+        RecoverUsedCommonStack(cur_co->stack);
     }
 }
 
@@ -145,8 +145,8 @@ void McoResume(McoRoutine *co) {
         co->in_callstack = true;
         LOGGER_TRACE("will resume co:" << (unsigned long)co);
         LOGGER_TRACE("will resume sink:" << (unsigned long)(co->sink));
-        LOGGER_TRACE("co stack:" << (unsigned long)(co->coctx->stack->stack));
-        LOGGER_TRACE("sink stack:" << (unsigned long)(co->sink->coctx->stack->stack));
+        LOGGER_TRACE("co stack:" << (unsigned long)(co->stack->stack));
+        LOGGER_TRACE("sink stack:" << (unsigned long)(co->sink->stack->stack));
         McoSwap(co->sink, co);
     } else {
         McoYield(cur_co);
@@ -192,7 +192,7 @@ void McoFree(McoRoutine *co) {
         SetCommonOccupy(nullptr);
     }
     LOGGER_TRACE("Begin RecycleMcoStack.");
-    RecycleMcoStack(co->coctx->stack);
+    RecycleMcoStack(co->stack);
     LOGGER_TRACE("after RecycleMcoStack.");
     co->done = true;
     co->done_yield = true;
